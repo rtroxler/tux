@@ -3,7 +3,7 @@ defmodule Tux.DB do
 
 
   def initialize(db_name) do
-    Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: db_name)
+    Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: db_name, timeout: 15000)
   end
 
   def fetch_facilities(pid, city) do

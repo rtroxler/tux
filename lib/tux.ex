@@ -10,15 +10,13 @@ defmodule Tux do
     {:ok, facility_ids } = Tux.DB.fetch_facilities(db, city)
     {:ok, unit_ids} = Tux.DB.fetch_units(db, facility_ids, unit_length, unit_width)
 
-    #{:ok, rates, num_rentals} = Tux.DB.fetch_rental_rates(db, facility_ids, unit_ids)
-    #IO.puts "Average rate for a #{unit_length}x#{unit_width} in #{city} is $#{average_rate}. (#{num_rentals} rentals)"
-
     {:ok, rental_results, num_rentals} = Tux.DB.fetch_rentals(db, facility_ids, unit_ids)
 
     average_per_month = rental_results
     |> format_and_filter_rentals
     |> Tux.Calc.calculate_monthly_average # chunk this and perform in parallel, probably faster
 
+    # Want to some how add processing time.. not as critical though
     %{average_per_month: average_per_month, num_rentals_processed: num_rentals}
   end
 
