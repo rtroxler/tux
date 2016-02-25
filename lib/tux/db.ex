@@ -1,0 +1,40 @@
+defmodule Tux.DB do
+  import Postgrex, only: [query!: 3]
+
+
+  def initialize(db_name) do
+    Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: db_name)
+  end
+
+  def fetch_facilities(pid, city) do
+    result = query!(pid, """
+    SELECT addressable_id FROM addresses WHERE addresses.addressable_type = $1 AND addresses.city = $2
+    """, ["Facility ", city])
+    { :ok, List.flatten(result.rows) }
+  end
+
+  def fetch_units(pid, facility_ids, unit_length, unit_width) do
+    result = query!(pid, "SELECT id from units where units.length = $1 and units.width = $2 and units.facility_id = ANY ($3)", [unit_length, unit_width, facility_ids])
+    { :ok, List.flatten(result.rows)}
+  end
+
+  def fetch_rental_rates(pid, facility_ids, unit_ids) do
+    #require IEx
+    #IEx.pry
+    result = query!(pid, "SELECT current_rate from ledgers where ledgers.facility_id = ANY ($1) AND ledgers.unit_id = ANY ($2)", [facility_ids, unit_ids])
+    { :ok, List.flatten(result.rows), result.num_rows }
+  end
+
+  def fetch_rentals(pid, facility_ids, unit_ids) do
+    result = query!(pid, "SELECT current_rate, moved_in_at, closed_on from ledgers where ledgers.facility_id = ANY ($1) AND ledgers.unit_id = ANY ($2)", [facility_ids, unit_ids])
+    { :ok, result.rows}
+  end
+
+  # This is a doozy, and also slow (5-6 seconds each time) make it two queries, maybe?
+  # select a.city, a.state, count(l.id) from addresses a join facilities f on f.id = addressable_id and a.addressable_type = 'Facility' join ledgers l on l.facility_id = f.id join units u on l.unit_id = u.id where u.length = 20 and u.width = 20 group by a.city, a.state order by count(l.id) desc limit 10;
+  def fetch_popular_cities(pid, unit_length, unit_width) do
+    result = query!(pid, "SELECT a.city, a.state, count(l.id) from addresses a join facilities f on f.id = addressable_id and a.addressable_type = $1 join ledgers l on l.facility_id = f.id join units u on l.unit_id = u.id where u.length = $2 and u.width = $3 group by a.city, a.state order by count(l.id) desc limit 10", ["Facility", unit_length, unit_width])
+
+    result.rows
+  end
+end
