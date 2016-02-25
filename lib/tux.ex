@@ -11,6 +11,7 @@ defmodule Tux do
     {:ok, unit_ids} = Tux.DB.fetch_units(db, facility_ids, unit_length, unit_width)
     {:ok, rates, num_rentals} = Tux.DB.fetch_rental_rates(db, facility_ids, unit_ids)
 
+    # Need to have a if rates empty don't do this check..
     average_rate = rates
     |> filter_all_the_shit
     |> Tux.Calc.calculate_average(num_rentals)
@@ -24,6 +25,8 @@ defmodule Tux do
     |> format_rentals
     |> Enum.filter(fn (r) -> r.closed_on != nil && r.moved_in_at != nil end)
     |> Enum.take(10)
+    |> Enum.map(&Tux.Calc.compute_month_list(&1))
+    |> Tux.Calc.reduce_to_month_map
     require IEx
     IEx.pry
   end
