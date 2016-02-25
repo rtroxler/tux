@@ -40,7 +40,7 @@ defmodule Tux.DB do
       WHERE ledgers.facility_id = ANY ($1)
       AND ledgers.unit_id = ANY ($2)
     """, [facility_ids, unit_ids])
-    { :ok, result.rows}
+    { :ok, result.rows, result.num_rows}
   end
 
   # This is a doozy, and also slow (5-6 seconds each time) make it two queries, maybe?

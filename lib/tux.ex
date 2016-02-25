@@ -9,21 +9,17 @@ defmodule Tux do
     # Stick this shit somewhere too
     {:ok, facility_ids } = Tux.DB.fetch_facilities(db, city)
     {:ok, unit_ids} = Tux.DB.fetch_units(db, facility_ids, unit_length, unit_width)
-    {:ok, rates, num_rentals} = Tux.DB.fetch_rental_rates(db, facility_ids, unit_ids)
 
-    # Need to have a if rates empty don't do this check..
-    average_rate = rates
-    |> filter_all_the_shit
-    |> Tux.Calc.calculate_average(num_rentals)
+    #{:ok, rates, num_rentals} = Tux.DB.fetch_rental_rates(db, facility_ids, unit_ids)
+    #IO.puts "Average rate for a #{unit_length}x#{unit_width} in #{city} is $#{average_rate}. (#{num_rentals} rentals)"
 
-    IO.puts "Average rate for a #{unit_length}x#{unit_width} in #{city} is $#{average_rate}. (#{num_rentals} rentals)"
+    {:ok, rental_results, num_rentals} = Tux.DB.fetch_rentals(db, facility_ids, unit_ids)
 
-    # playing with stuff
-    {:ok, rental_results} = Tux.DB.fetch_rentals(db, facility_ids, unit_ids)
-
-    rental_results
+    average_per_month = rental_results
     |> format_and_filter_rentals
     |> Tux.Calc.calculate_monthly_average # chunk this and perform in parallel, probably faster
+
+    %{average_per_month: average_per_month, num_rentals_processed: num_rentals}
   end
 
   def popular_cities(unit_length, unit_width) do
