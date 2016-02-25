@@ -1,5 +1,5 @@
 defmodule Tux.DB do
-  import Postgrex, only: [query!: 3]
+  import Postgrex, only: [query!: 3, query!: 4]
 
 
   def initialize(db_name) do
@@ -15,6 +15,9 @@ defmodule Tux.DB do
     { :ok, List.flatten(result.rows) }
   end
 
+  ########
+  # Units
+  ########
   def fetch_units(pid, facility_ids, unit_length, unit_width) do
     result = query!(pid, """
     SELECT id from units
@@ -24,6 +27,21 @@ defmodule Tux.DB do
     """, [unit_length, unit_width, facility_ids])
     { :ok, List.flatten(result.rows)}
   end
+
+  def fetch_units(pid, unit_length, unit_width) do
+    result = query!(pid, """
+    SELECT id from units
+      WHERE units.length = $1
+      AND units.width = $2
+    """, [unit_length, unit_width])
+    { :ok, List.flatten(result.rows)}
+  end
+
+
+
+  #########
+  # Rentals
+  #########
 
   def fetch_rental_rates(pid, facility_ids, unit_ids) do
     result = query!(pid, """
@@ -40,6 +58,14 @@ defmodule Tux.DB do
       WHERE ledgers.facility_id = ANY ($1)
       AND ledgers.unit_id = ANY ($2)
     """, [facility_ids, unit_ids])
+    { :ok, result.rows, result.num_rows}
+  end
+
+  def fetch_rentals(pid, unit_ids) do
+    result = query!(pid, """
+    SELECT current_rate, moved_in_at, closed_on from ledgers
+      WHERE ledgers.unit_id = ANY ($1)
+    """, [unit_ids], [timeout: 15000])
     { :ok, result.rows, result.num_rows}
   end
 
