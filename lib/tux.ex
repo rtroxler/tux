@@ -21,13 +21,9 @@ defmodule Tux do
     # playing with stuff
     {:ok, rental_results} = Tux.DB.fetch_rentals(db, facility_ids, unit_ids)
 
-    rentals = rental_results
-    |> format_rentals
-    |> Enum.filter(fn (r) -> r.moved_in_at != nil end)
-    |> Enum.map(&Tux.Calc.compute_month_list(&1))
-    |> Tux.Calc.reduce_to_month_map
-    require IEx
-    IEx.pry
+    rental_results
+    |> format_and_filter_rentals
+    |> Tux.Calc.calculate_monthly_average # chunk this and perform in parallel, probably faster
   end
 
   def popular_cities(unit_length, unit_width) do
@@ -35,17 +31,19 @@ defmodule Tux do
     Tux.DB.fetch_popular_cities(db, unit_length, unit_width)
   end
 
+
   defp filter_all_the_shit(rates) do
     rates
     |> Enum.filter(&(&1 != nil))
     |> Enum.filter(&(&1 != Decimal.new(-1.0))) # Fuckin' -1 rates ( I Don't think this works )
   end
 
-  defp format_rentals(rentals) do
+  defp format_and_filter_rentals(rentals) do
     rentals
     |> Enum.map(&(Enum.zip([:rate, :moved_in_at, :closed_on], &1)))
     |> Enum.map(&Enum.into(&1, %{}))
     |> Enum.map(fn (r) -> %Rental{rate: r.rate, moved_in_at: r.moved_in_at, closed_on: r.closed_on} end)
+    |> Enum.filter(fn (r) -> r.moved_in_at != nil  && r.rate != nil end)
   end
 
 end

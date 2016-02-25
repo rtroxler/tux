@@ -34,6 +34,7 @@ defmodule Tux.Calc do
     |> List.flatten
   end
 
+
   ####################
   # Compute Month Map
   ####################
@@ -53,9 +54,30 @@ defmodule Tux.Calc do
   end
 
 
+  ####################
+  # Reduce to Avg List
+  ####################
+  def reduce_to_averages_list(month_map) do
+    Enum.reduce(1..12, [], fn month, acc ->
+      acc ++ [Tux.Calc.calculate_average(Dict.get(month_map, month))]
+    end)
+  end
+
+  # Calculate Monthly Average Task
+  def calculate_monthly_average(rentals) do
+    rentals
+    |> Enum.map(&compute_month_list(&1))
+    |> reduce_to_month_map
+    |> reduce_to_averages_list
+    |> Enum.map(&(Decimal.to_string(&1) |> String.to_float))
+  end
+
   #####################
   # Average Calculation
   #####################
+  def calculate_average(rates), do:
+    calculate_average(rates, Enum.count(rates))
+
   def calculate_average(rates, num_rentals) do
     Decimal.div(
       Enum.reduce(rates, Decimal.new(0.0), fn (i, acc) -> Decimal.add(i, acc) end),
