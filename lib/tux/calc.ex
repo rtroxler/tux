@@ -14,7 +14,9 @@ defmodule Tux.Calc do
     Enum.to_list month1..month2
 
   def compute_month_list(moved_in_at, nil) do
-    # TODO: me
+    # grab today's year and month
+    { {year, month, _}, _ } = :os.timestamp |> :calendar.now_to_datetime
+    compute_month_list(moved_in_at, %Timestamp{year: year, month: month})
   end
 
   def compute_month_list(moved_in_at, closed_on) do

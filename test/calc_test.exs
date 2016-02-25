@@ -41,4 +41,13 @@ defmodule CalcTest do
       1,2,3]
   end
 
+  test "compute_month_list when closed_on is nil" do
+    rental = %Rental{
+      moved_in_at: %Timestamp{year: 2015, month: 11},
+      closed_on:   nil
+    }
+
+    assert compute_month_list(rental.moved_in_at, rental.closed_on) == [11,12,1,2]
+  end
+
 end

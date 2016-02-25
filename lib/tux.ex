@@ -23,8 +23,7 @@ defmodule Tux do
 
     rentals = rental_results
     |> format_rentals
-    |> Enum.filter(fn (r) -> r.closed_on != nil && r.moved_in_at != nil end)
-    |> Enum.take(10)
+    |> Enum.filter(fn (r) -> r.moved_in_at != nil end)
     |> Enum.map(&Tux.Calc.compute_month_list(&1))
     |> Tux.Calc.reduce_to_month_map
     require IEx
