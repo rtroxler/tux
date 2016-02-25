@@ -17,7 +17,9 @@ defmodule Tux do
     |> Tux.Calc.calculate_monthly_average # chunk this and perform in parallel, probably faster
 
     # Want to some how add processing time.. not as critical though
-    %{average_per_month: average_per_month, num_rentals_processed: num_rentals}
+    Enum.zip(month_array, average_per_month)
+    |> Enum.into(Map.new)
+    |> Map.put("num-rentals-processed", num_rentals)
   end
 
   def popular_cities(unit_length, unit_width) do
@@ -40,4 +42,7 @@ defmodule Tux do
     |> Enum.filter(fn (r) -> r.moved_in_at != nil  && r.rate != nil end)
   end
 
+  defp month_array do
+    [:january, :febuary, :march, :april, :may, :june, :july, :august, :september, :october, :november, :december]
+  end
 end
