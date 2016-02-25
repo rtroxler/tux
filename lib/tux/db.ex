@@ -82,7 +82,7 @@ defmodule Tux.DB do
       GROUP BY a.city, a.state
       ORDER BY count(l.id) desc
       LIMIT 10
-    """, ["Facility", unit_length, unit_width])
+    """, ["Facility", unit_length, unit_width], [timeout: 15000])
 
     result.rows
   end
