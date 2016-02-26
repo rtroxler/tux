@@ -4,6 +4,8 @@ defmodule Tux do
 
   # This is all gross as shit. #YOLO swag hackathon code
   def process(unit_length, unit_width, city) do
+    time_start = :erlang.monotonic_time
+
     {:ok, db} = Tux.DB.initialize("cs_prod")
 
     # Stick this shit somewhere too
@@ -35,14 +37,19 @@ defmodule Tux do
     |> Tux.Parallel.flatten_tuples_and_average # now this part is slow...
     |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
+    time_end = :erlang.monotonic_time
+    processing_time = (time_end - time_start) / 1000000000
+
     # format_result
     Enum.zip(month_array, done)
     |> Enum.into(Map.new)
     |> Map.put("num-rentals-processed", num_rentals)
+    |> Map.put("processing-time", processing_time)
   end
 
   def process(unit_length, unit_width) do
-    require IEx
+    time_start = :erlang.monotonic_time
+
     {:ok, db} = Tux.DB.initialize("cs_prod")
     {:ok, unit_ids} = Tux.DB.fetch_units(db, unit_length, unit_width)
     {:ok, rental_results, num_rentals} = Tux.DB.fetch_rentals(db, unit_ids)
@@ -63,10 +70,14 @@ defmodule Tux do
     |> Tux.Parallel.flatten_tuples_and_average # now this part is slow...
     |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
+    time_end = :erlang.monotonic_time
+    processing_time = (time_end - time_start) / 1000000000
+
     # format_result
     Enum.zip(month_array, done)
     |> Enum.into(Map.new)
     |> Map.put("num-rentals-processed", num_rentals)
+    |> Map.put("processing-time", processing_time)
   end
 
   def popular_cities(unit_length, unit_width) do
