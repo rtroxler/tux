@@ -33,7 +33,7 @@ defmodule Tux do
     # this and above should be one method
     done = average_per_month
     |> Tux.Parallel.flatten_tuples_and_average # now this part is slow...
-    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0)))
+    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
     # format_result
     Enum.zip(month_array, done)
