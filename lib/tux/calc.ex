@@ -78,6 +78,8 @@ defmodule Tux.Calc do
   def calculate_average(rates), do:
     calculate_average(rates, Enum.count(rates))
 
+  def calculate_average(rates, 0), do: Decimal.new(0.0)
+
   def calculate_average(rates, num_rentals) do
     Decimal.div(
       Enum.reduce(rates, Decimal.new(0.0), fn (i, acc) -> Decimal.add(i, acc) end),
