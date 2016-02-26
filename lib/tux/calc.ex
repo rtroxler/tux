@@ -41,7 +41,7 @@ defmodule Tux.Calc do
   def reduce_to_month_map(rentals) do
     Enum.reduce(rentals, base_month_map, fn (rental, month_map) ->
       Enum.reduce(rental.month_list, month_map, fn (month, inner_month_map) ->
-        Map.put(inner_month_map, month, month_map[month] ++ [rental.rate])
+        Map.put(inner_month_map, month, inner_month_map[month] ++ [rental.rate])
       end)
     end)
   end

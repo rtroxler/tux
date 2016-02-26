@@ -1,6 +1,6 @@
 defmodule CalcTest do
   use ExUnit.Case
-  import Tux.Calc, only: [ compute_month_list: 2 ]
+  import Tux.Calc, only: [ compute_month_list: 2, reduce_to_month_map: 1]
   alias Postgrex.Timestamp
   alias Tux.Rental
 
@@ -50,4 +50,22 @@ defmodule CalcTest do
     assert compute_month_list(rental.moved_in_at, rental.closed_on) == [11,12,1,2]
   end
 
+
+  test "computes month map correctly when rentals span multiple years" do
+    rental = %Rental{
+      rate: 24.0,
+      month_list: [1,2,3,4,5,6,7,8,9,10,11,12,
+        1,2,3]
+    }
+    rental2 = %Rental{
+      rate: 44.0,
+      month_list: [7,8,9,10,11,12,
+        1,2,3,4,5,6,7,8,9]
+    }
+
+    assert reduce_to_month_map([rental, rental2]) == %{1 => [24.0, 24.0, 44.0], 2 => [24.0, 24.0, 44.0], 3 => [24.0, 24.0, 44.0],
+    4 => [24.0, 44.0], 5 => [24.0, 44.0], 6 => [24.0, 44.0],
+    7 => [24.0, 44.0, 44.0], 8 => [24.0, 44.0, 44.0],
+    9 => [24.0, 44.0, 44.0], 10 => [24.0, 44.0], 11 => [24.0, 44.0], 12 => [24.0, 44.0]}
+  end
 end
