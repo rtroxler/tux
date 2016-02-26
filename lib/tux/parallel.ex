@@ -40,7 +40,9 @@ defmodule Tux.Parallel do
 
   def calculate_optimal_process_size(num_rentals) do
     cond do
-      Enum.member?(50_000..500_000, num_rentals) ->
+      Enum.member?(100_000..500_000, num_rentals) ->
+        2500
+      Enum.member?(50_000..99_999, num_rentals) ->
         1000
       Enum.member?(1000..49_999, num_rentals) ->
         100

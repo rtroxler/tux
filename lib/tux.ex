@@ -30,10 +30,12 @@ defmodule Tux do
     average_per_month = Enum.chunk(rental_results, chunk_size) ++ [Enum.take(rental_results, -leftovers)]
     |> Tux.Parallel.parallel_crunch
 
+    # this and above should be one method
     done = average_per_month
     |> Tux.Parallel.flatten_tuples_and_average # now this part is slow...
+    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0)))
 
-    # Want to some how add processing time.. not as critical though
+    # format_result
     Enum.zip(month_array, done)
     |> Enum.into(Map.new)
     |> Map.put("num-rentals-processed", num_rentals)
@@ -45,6 +47,7 @@ defmodule Tux do
     {:ok, unit_ids} = Tux.DB.fetch_units(db, unit_length, unit_width)
     {:ok, rental_results, num_rentals} = Tux.DB.fetch_rentals(db, unit_ids)
 
+    # move into Parallel
     processes = Tux.Parallel.calculate_optimal_process_size(num_rentals)
     chunk_size = div(num_rentals, processes)
     leftovers = rem(num_rentals, processes)
@@ -55,12 +58,15 @@ defmodule Tux do
     average_per_month = Enum.chunk(rental_results, chunk_size) ++ [Enum.take(rental_results, -leftovers)]
     |> Tux.Parallel.parallel_crunch
 
+    # why can't this and the last be one method
     done = average_per_month
     |> Tux.Parallel.flatten_tuples_and_average # now this part is slow...
+    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
-    IO.inspect done
-
-    {done, num_rentals}
+    # format_result
+    Enum.zip(month_array, done)
+    |> Enum.into(Map.new)
+    |> Map.put("num-rentals-processed", num_rentals)
   end
 
   def popular_cities(unit_length, unit_width) do
