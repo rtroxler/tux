@@ -1,4 +1,5 @@
 defmodule Tux do
+  require IEx
 
   defmodule Rental, do: defstruct rate: nil, moved_in_at: nil, closed_on: nil, month_list: []
 
@@ -14,17 +15,6 @@ defmodule Tux do
 
     {:ok, rental_results, num_rentals} = Tux.DB.fetch_rentals(db, facility_ids, unit_ids)
 
-    # TESTING NON PARALLEL
-    # ( non parallel now sucks since I'm calculating it correctly)
-    #non_parallel_average_per_month = rental_results
-    #|> format_and_filter_rentals
-    #|> Tux.Calc.calculate_monthly_average
-
-    #IO.inspect Enum.zip(month_array, non_parallel_average_per_month)
-
-
-
-    # TESTING PARALLEL
     processes = Tux.Parallel.calculate_optimal_process_size(num_rentals)
     chunk_size = div(num_rentals, processes)
     leftovers = rem(num_rentals, processes)
@@ -38,7 +28,7 @@ defmodule Tux do
     |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
     time_end = :erlang.monotonic_time
-    processing_time = (time_end - time_start) / 1000000000
+    processing_time = (time_end - time_start) / 1000000000 |> Float.round(3)
 
     # format_result
     Enum.zip(month_array, done)
@@ -71,7 +61,7 @@ defmodule Tux do
     |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
 
     time_end = :erlang.monotonic_time
-    processing_time = (time_end - time_start) / 1000000000
+    processing_time = (time_end - time_start) / 1000000000 |> Float.round(3)
 
     # format_result
     Enum.zip(month_array, done)
