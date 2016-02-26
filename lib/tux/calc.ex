@@ -2,6 +2,17 @@ defmodule Tux.Calc do
   alias Tux.Rental
   alias Postgrex.Timestamp
 
+  ############
+  # Formatting
+  ############
+  def format_and_filter_rentals(rentals) do
+    rentals
+    |> Enum.map(&(Enum.zip([:rate, :moved_in_at, :closed_on], &1)))
+    |> Enum.map(&Enum.into(&1, %{}))
+    |> Enum.map(fn (r) -> %Rental{rate: r.rate, moved_in_at: r.moved_in_at, closed_on: r.closed_on} end)
+    |> Enum.filter(fn (r) -> r.moved_in_at != nil  && r.rate != nil  end)
+  end
+
   ####################
   # Compute Month List
   ####################

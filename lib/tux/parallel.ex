@@ -1,5 +1,28 @@
 defmodule Tux.Parallel do
 
+  def process(rental_results, num_rentals, time_start) do
+    processes = Tux.Parallel.calculate_optimal_process_size(num_rentals)
+    chunk_size = div(num_rentals, processes)
+    leftovers = rem(num_rentals, processes)
+
+    average_per_month = Enum.chunk(rental_results, chunk_size) ++ [Enum.take(rental_results, -leftovers)]
+    |> parallel_crunch
+
+    # this and above should be one method
+    done = average_per_month
+    |> flatten_tuples_and_average # now this part is slow...
+    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0) |> Float.round(2)))
+
+    time_end = :erlang.monotonic_time
+    processing_time = (time_end - time_start) / 1000000000 |> Float.round(3)
+
+    # format_result
+    Enum.zip(Tux.month_array, done)
+    |> Enum.into(Map.new)
+    |> Map.put("num-rentals-processed", num_rentals)
+    |> Map.put("processing-time", processing_time)
+  end
+
   def parallel_crunch(chunked_avgs) do
     c = chunked_avgs
     |> Stream.map( fn rental_chunk ->
@@ -9,7 +32,7 @@ defmodule Tux.Parallel do
 
   def crunch_some_data(rentals) do
     rentals
-    |> Tux.format_and_filter_rentals
+    |> Tux.Calc.format_and_filter_rentals
     |> calculate_parallel_averages
   end
 
