@@ -39,10 +39,10 @@ defmodule Tux do
     |> Enum.map(&(Enum.zip([:rate, :moved_in_at, :closed_on], &1)))
     |> Enum.map(&Enum.into(&1, %{}))
     |> Enum.map(fn (r) -> %Rental{rate: r.rate, moved_in_at: r.moved_in_at, closed_on: r.closed_on} end)
-    |> Enum.filter(fn (r) -> r.moved_in_at != nil  && r.rate != nil end)
+    |> Enum.filter(fn (r) -> r.moved_in_at != nil  && r.rate != nil  end)
   end
 
   defp month_array do
-    [:january, :febuary, :march, :april, :may, :june, :july, :august, :september, :october, :november, :december]
+    [:january, :february, :march, :april, :may, :june, :july, :august, :september, :october, :november, :december]
   end
 end
