@@ -69,7 +69,7 @@ defmodule Tux.Calc do
     |> Enum.map(&compute_month_list(&1))
     |> reduce_to_month_map
     |> reduce_to_averages_list
-    |> Enum.map(&(Decimal.to_string(&1) |> String.to_float))
+    |> Enum.map(&(Decimal.to_string(&1) |> Float.parse |> elem(0)))
   end
 
   #####################
@@ -81,9 +81,18 @@ defmodule Tux.Calc do
   def calculate_average(rates, 0), do: Decimal.new(0.0)
 
   def calculate_average(rates, num_rentals) do
-    Decimal.div(
-      Enum.reduce(rates, Decimal.new(0.0), fn (i, acc) -> Decimal.add(i, acc) end),
-      Decimal.new(num_rentals)
-    ) |> Decimal.round(2)
+    top = sum_rates(rates)
+    bottom = Decimal.new(num_rentals)
+    Decimal.div(top,bottom) |> Decimal.round(2)
+  end
+
+  def sum_rates(rates), do:
+    Enum.reduce(rates, Decimal.new(0.0), fn (i, acc) -> Decimal.add(i, acc) end)
+
+  # man there has to be a better way to init these
+  def base_tuple_list do
+    [{Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0},
+     {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0},
+     {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}, {Decimal.new(0.0), 0}]
   end
 end

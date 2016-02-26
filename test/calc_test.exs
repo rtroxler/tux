@@ -1,6 +1,6 @@
 defmodule CalcTest do
   use ExUnit.Case
-  import Tux.Calc, only: [ compute_month_list: 2, reduce_to_month_map: 1]
+  import Tux.Calc, only: [ compute_month_list: 2, reduce_to_month_map: 1, reduce_to_averages_list: 1]
   alias Postgrex.Timestamp
   alias Tux.Rental
 
@@ -67,5 +67,14 @@ defmodule CalcTest do
     4 => [24.0, 44.0], 5 => [24.0, 44.0], 6 => [24.0, 44.0],
     7 => [24.0, 44.0, 44.0], 8 => [24.0, 44.0, 44.0],
     9 => [24.0, 44.0, 44.0], 10 => [24.0, 44.0], 11 => [24.0, 44.0], 12 => [24.0, 44.0]}
+  end
+
+  test "reduce_to_averages_list" do
+    month_map = %{1 => [Decimal.new(24.0), Decimal.new(24.0), Decimal.new(44.0)], 2 => [Decimal.new(24.0), Decimal.new(24.0), Decimal.new(44.0)], 3 => [Decimal.new(24.0), Decimal.new(24.0), Decimal.new(44.0)],
+    4 => [Decimal.new(24.0), Decimal.new(44.0)], 5 => [Decimal.new(24.0), Decimal.new(44.0)], 6 => [Decimal.new(24.0), Decimal.new(44.0)],
+    7 => [Decimal.new(24.0), Decimal.new(44.0), Decimal.new(44.0)], 8 => [Decimal.new(24.0), Decimal.new(44.0), Decimal.new(44.0)],
+    9 => [Decimal.new(24.0), Decimal.new(44.0), Decimal.new(44.0)], 10 => [Decimal.new(24.0), Decimal.new(44.0)], 11 => [Decimal.new(24.0), Decimal.new(44.0)], 12 => [Decimal.new(24.0), Decimal.new(44.0)] }
+
+    assert reduce_to_averages_list(month_map) == [Decimal.new(30.67), Decimal.new(30.67), Decimal.new(30.67), Decimal.new(34), Decimal.new(34), Decimal.new(34), Decimal.new(37.33), Decimal.new(37.33), Decimal.new(37.33), Decimal.new(34), Decimal.new(34), Decimal.new(34)]
   end
 end
